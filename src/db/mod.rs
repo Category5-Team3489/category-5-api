@@ -35,6 +35,7 @@ impl Db {
                         DbOutput::Pong
                     }
 
+                    // data
                     DbInput::Clone => {
                         DbOutput::Clone(self.data.clone())
                     }
@@ -86,11 +87,11 @@ impl Db {
 }
 
 impl Db {
-    pub async fn ext_req(db: Extension<DbConnection>, input: DbInput) -> DbOutput {
+    pub async fn ext_call(db: Extension<DbConnection>, input: DbInput) -> DbOutput {
         Self::req(db.0, input).await
     }
     
-    pub async fn req(db: DbConnection, input: DbInput) -> DbOutput {
+    pub async fn call(db: DbConnection, input: DbInput) -> DbOutput {
         let notifier = Arc::new(Notify::new());
         let output = Arc::new(OnceCell::new());
     
@@ -108,6 +109,7 @@ impl Db {
 pub enum DbInput {
 	Ping,
 
+    // data
     Clone,
 
     // data.students
@@ -129,6 +131,7 @@ pub enum DbOutput {
 	Pong,
     Void,
 
+    // data
     Clone(DbData),
 
     // data.students
