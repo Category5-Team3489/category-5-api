@@ -1,0 +1,24 @@
+[package]
+name = "category-5-api"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+axum = "0.5.17"
+tokio = { version = "1", features = ["full"] }
+flume = "0.10.14"
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+serenity = { default-features = false, features = ["client", "gateway", "rustls_backend", "model"] }
+
+[dependencies.uuid]
+version = "1.2.1"
+features = [
+    "v4",                # Lets you generate random UUIDs
+    "fast-rng",          # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+	"serde"
+]
