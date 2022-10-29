@@ -32,6 +32,7 @@ pub trait Crud<T: Clone> {
         }
         None
     }
+    // May want to return Option<T>, may want delete_all and this with Option<T>?
     fn delete(v: &mut Vec<T>, predicate: impl FnMut(&T) -> bool) -> usize {
         let initial_size = v.len();
         v.retain(predicate);
