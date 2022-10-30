@@ -1,20 +1,45 @@
 use serenity::framework::standard::macros::command;
 use serenity::framework::standard::{Args, CommandResult};
 use serenity::model::prelude::*;
+use serenity::model::prelude::component::{InputTextStyle, ButtonStyle};
 use serenity::prelude::*;
 
 #[command]
 pub async fn multiply(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let one = args.single::<f64>()?;
-    let two = args.single::<f64>()?;
+    //let one = args.single::<f64>()?;
+    //let two = args.single::<f64>()?;
 
-    let product = one * two;
+    //let product = one * two;
 
-    msg.channel_id.say(&ctx.http, product).await?;
+    //msg.channel_id.say(&ctx.http, product).await?;
 
     let m = msg.channel_id.send_message(&ctx, |m| {
         m.content("Select something!").components(|c| {
             c.create_action_row(|row| {
+                row.create_input_text(|text| {
+                    text.custom_id("input_text");
+                    text.style(InputTextStyle::Short);
+                    text.label("Input Text");
+                    text.placeholder("Input Text Placeholder")
+                })
+                /*
+                row.create_button(|button| {
+                    button.custom_id("1");
+                    button.label("Button");
+                    button.style(ButtonStyle::Primary)
+                });
+                row.create_button(|button| {
+                    button.custom_id("2");
+                    button.label("Button");
+                    button.style(ButtonStyle::Secondary)
+                });
+                row.create_button(|button| {
+                    button.custom_id("3");
+                    button.label("Button");
+                    button.style(ButtonStyle::Danger)
+                })
+                */
+                /*
                 row.create_select_menu(|menu| {
                     menu.custom_id("animal_select");
                     menu.placeholder("No animal selected");
@@ -37,6 +62,7 @@ pub async fn multiply(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
                         f.create_option(|o| o.label("16").value("16"))
                     })
                 })
+                */
             })
         })
     }).await.unwrap();

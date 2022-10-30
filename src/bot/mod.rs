@@ -17,6 +17,7 @@ use serenity::prelude::*;
 
 use crate::db::DbConnection;
 use crate::bot::commands::math::*;
+use crate::bot::commands::owner::*;
 
 pub struct ShardManagerContainer;
 
@@ -65,7 +66,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(multiply)]
+#[commands(multiply, quit)]
 struct General;
 
 pub struct Bot {

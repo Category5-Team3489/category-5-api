@@ -17,6 +17,8 @@ use crate::{db::{
     DbFunction
 }, bot::Bot};
 
+// TODO todo every meeting, send out a message in the attendance channel, react to mark attendance??
+
 #[tokio::main]
 async fn main() {
     println!("Hello, world!");
