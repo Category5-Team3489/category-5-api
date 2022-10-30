@@ -88,7 +88,7 @@ impl Db {
 
 impl Db {
     pub async fn ext_call(db: Extension<DbConnection>, input: DbInput) -> DbOutput {
-        Self::req(db.0, input).await
+        Self::call(db.0, input).await
     }
     
     pub async fn call(db: DbConnection, input: DbInput) -> DbOutput {

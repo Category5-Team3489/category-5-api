@@ -12,7 +12,7 @@ tokio = { version = "1", features = ["full"] }
 flume = "0.10.14"
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
-serenity = { default-features = false, features = ["client", "gateway", "rustls_backend", "model"] }
+serenity = { default-features = false, features = ["client", "gateway", "rustls_backend", "model", "collector"] }
 
 [dependencies.uuid]
 version = "1.2.1"

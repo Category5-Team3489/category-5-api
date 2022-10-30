@@ -19,6 +19,25 @@ impl EventHandler for Handler {
                 println!("Error sending message: {:?}", why);
             }
         }
+        else if msg.content == "animal" {
+            let m = msg.channel_id.send_message(&ctx, |m| {
+                m.content("Select something!").components(|c| {
+                    c.create_action_row(|row| {
+                        row.create_select_menu(|menu| {
+                            menu.custom_id("animal_select");
+                            menu.placeholder("No animal selected");
+                            menu.options(|f| {
+                                f.create_option(|o| o.label("a").value("A"))
+                            })
+                        })
+                    })
+                })
+            }).await.unwrap();
+
+            let interaction = match m.await_component_interaction() {
+                
+            };
+        }
     }
 
     async fn ready(&self, _: Context, ready: Ready) {

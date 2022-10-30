@@ -47,7 +47,7 @@ async fn main() {
 
 async fn index(db: Extension<DbConnection>) -> String {
     let input = DbInput::Clone;
-    let output = Db::ext_req(db, input).await;
+    let output = Db::ext_call(db, input).await;
 
     let output = macros::cast!(output, DbOutput::Clone);
     serde_json::to_string(&output).unwrap()
@@ -55,7 +55,7 @@ async fn index(db: Extension<DbConnection>) -> String {
 
 async fn create_student(db: Extension<DbConnection>, Path(name): Path<String>) -> String {
     let input = DbInput::CreateStudent(name, true);
-    let output = Db::ext_req(db, input).await;
+    let output = Db::ext_call(db, input).await;
 
     let output = cast!(output, DbOutput::CreateStudent).unwrap();
     serde_json::to_string(&output).unwrap()
