@@ -6,7 +6,7 @@ mod macros;
 use std::sync::Arc;
 
 use axum::{routing::get, Extension, Router, extract::Path};
-use db::{DbConnection, DbInput, DbOutput};
+use db::{DbConnection, DbInput, DbOutput, data::student::Student};
 use macros::cast;
 use tokio::{
     join
@@ -56,7 +56,7 @@ async fn index(db: Extension<DbConnection>) -> String {
 }
 
 async fn create_student(db: Extension<DbConnection>, Path(name): Path<String>) -> String {
-    let input = DbInput::CreateStudent(name, true);
+    let input = DbInput::CreateStudent(Student::new(name), true);
     let output = Db::ext_call(db, input).await;
 
     let output = cast!(output, DbOutput::CreateStudent).unwrap();

@@ -41,8 +41,8 @@ impl Db {
                     }
 
                     // data.students
-                    DbInput::CreateStudent(name, should_read) => {
-                        let o = Student::create(&mut self.data.students, Student::new(name), should_read);
+                    DbInput::CreateStudent(student, should_read) => {
+                        let o = Student::create(&mut self.data.students, student, should_read);
                         DbOutput::CreateStudent(o)
                     }
                     DbInput::ReadStudent(predicate) => {
@@ -59,8 +59,8 @@ impl Db {
                     }
 
                     // data.events
-                    DbInput::CreateEvent(name, kind, start_time, end_time, should_read) => {
-                        let o = Event::create(&mut self.data.events, Event::new(name, kind, start_time, end_time), should_read);
+                    DbInput::CreateEvent(event, should_read) => {
+                        let o = Event::create(&mut self.data.events, event, should_read);
                         DbOutput::CreateEvent(o)
                     }
                     DbInput::ReadEvent(predicate) => {
@@ -113,13 +113,13 @@ pub enum DbInput {
     Clone,
 
     // data.students
-    CreateStudent(String, bool),
+    CreateStudent(Student, bool),
     ReadStudent(Box<dyn FnMut(&Student) -> bool + Send>),
     UpdateStudent(Box<dyn FnMut(&Student) -> bool + Send>, Box<dyn FnMut(&mut Student) + Send>, bool),
     DeleteStudent(Box<dyn FnMut(&Student) -> bool + Send>),
 
     // data.events
-    CreateEvent(String, String, DateTime<Utc>, DateTime<Utc>, bool),
+    CreateEvent(Event, bool),
     ReadEvent(Box<dyn FnMut(&Event) -> bool + Send>),
     UpdateEvent(Box<dyn FnMut(&Event) -> bool + Send>, Box<dyn FnMut(&mut Event) + Send>, bool),
     DeleteEvent(Box<dyn FnMut(&Event) -> bool + Send>),

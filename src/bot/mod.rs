@@ -16,13 +16,19 @@ use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 
 use crate::db::DbConnection;
-use crate::bot::commands::math::*;
+use crate::bot::commands::event::*;
 use crate::bot::commands::owner::*;
 
 pub struct ShardManagerContainer;
 
 impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
+}
+
+pub struct DbConnectionContainer;
+
+impl TypeMapKey for DbConnectionContainer {
+    type Value = DbConnection;
 }
 
 struct Handler;
@@ -66,8 +72,15 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(multiply, quit)]
+#[only_in(guilds)]
+#[commands(quit)]
 struct General;
+
+#[group]
+#[only_in(guilds)]
+#[prefixes("event", "e")]
+#[commands(create)]
+struct Event;
 
 pub struct Bot {
     db: DbConnection,
@@ -110,7 +123,8 @@ impl Bot {
             .configure(|c| c
                 .owners(owners)
                 .prefix("!"))
-            .group(&GENERAL_GROUP);
+            .group(&GENERAL_GROUP)
+            .group(&EVENT_GROUP);
         
         let intents = GatewayIntents::GUILD_MESSAGES
             | GatewayIntents::DIRECT_MESSAGES
@@ -124,7 +138,7 @@ impl Bot {
         {
             let mut data = client.data.write().await;
             data.insert::<ShardManagerContainer>(client.shard_manager.clone());
-            //data.insert::<DbConnection>(self.db);
+            data.insert::<DbConnectionContainer>(self.db);
         }
 
         let shard_manager = client.shard_manager.clone();
