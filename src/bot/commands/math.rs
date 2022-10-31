@@ -103,17 +103,22 @@ pub async fn multiply(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     if let Some(i) = modal {
         match &i.data.components[0].components[0] {
             ActionRowComponent::InputText(text) => {
-                msg.reply(&ctx, format!("{}", text.value)).await.unwrap();
-                ht
+                i.create_interaction_response(&ctx, |r| {
+                    r.kind(InteractionResponseType::ChannelMessageWithSource);
+                    r.interaction_response_data(|d| {
+                        d.ephemeral(true);
+                        d.content(format!("{}", text.value))
+                    })
+                }).await.unwrap();
             }
-            _ => panic!("why did this happen??"),
+            _ => unreachable!(),
         }
     }
 
 
     // other event kind, have them specify, in modal panel, drop down + other and specify
 
-    //m.delete(&ctx).await.unwrap();
+    m.delete(&ctx).await.unwrap();
 
     Ok(())
 }
