@@ -79,7 +79,7 @@ impl Db {
                 if let Err(err) = output.set(o) {
                     println!("Error: {:?}", err);
                 }
-                drop(output); // because of Arc::try_unwrap on response
+                drop(output); // because of Arc::try_unwrap on response right after notify await completion
                 notifier.notify_one();
             }
         })
@@ -88,10 +88,10 @@ impl Db {
 
 impl Db {
     pub async fn ext_call(db: Extension<DbConnection>, input: DbInput) -> DbOutput {
-        Self::call(db.0, input).await
+        Self::call(&db.0, input).await
     }
     
-    pub async fn call(db: DbConnection, input: DbInput) -> DbOutput {
+    pub async fn call(db: &DbConnection, input: DbInput) -> DbOutput {
         let notifier = Arc::new(Notify::new());
         let output = Arc::new(OnceCell::new());
     

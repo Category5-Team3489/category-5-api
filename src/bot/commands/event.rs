@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use chrono::{Local, NaiveDateTime, NaiveDate};
-use serenity::builder::CreateMessage;
+use chrono::{Local, NaiveDateTime, NaiveDate, Utc, TimeZone, NaiveTime, Timelike, LocalResult, FixedOffset, Offset};
+use serenity::builder::{CreateMessage, CreateEmbed};
 use serenity::collector::CollectModalInteraction;
 use serenity::framework::standard::macros::command;
 use serenity::framework::standard::{Args, CommandResult};
@@ -10,6 +10,8 @@ use serenity::model::prelude::component::{InputTextStyle, ButtonStyle, InputText
 use serenity::prelude::*;
 use serenity::model::application::interaction::InteractionResponseType;
 use crate::bot::commands::event::component::ActionRowComponent;
+use crate::bot::{parse_utils, DbConnectionContainer};
+use crate::db::{Db, DbInput, data, DbOutput};
 use crate::macros::cast;
 
 /*
@@ -133,39 +135,87 @@ pub async fn create(ctx: &Context, msg: &Message) -> CommandResult {
         let start_time = cast!(&modal_interaction.data.components[3].components[0], ActionRowComponent::InputText).value.as_str();
         let end_time = cast!(&modal_interaction.data.components[4].components[0], ActionRowComponent::InputText).value.as_str();
 
-        // make util funcs to help parse, give &str, return Result<String> of error msg, doesnt need to be async
-
-        {
-            let date_split = date.split('/').collect::<Vec<_>>();
-            if date_split.len() != 3 {
-                msg.reply(&ctx, "Date must have three numbers").await.unwrap();
+        let date = match parse_utils::parse_date(date) {
+            Ok(date) => {
+                date
+            }
+            Err(err) => {
+                msg.reply(&ctx, err).await.unwrap();
                 m.delete(&ctx).await.unwrap();
                 return Ok(());
             }
-            let month = date_split[0].parse::<u32>();
-            if let Ok(month) = month {
+        };
 
+        let start_time = match parse_utils::parse_time(start_time) {
+            Ok(start_time) => {
+                start_time
             }
-            else {
-                msg.reply(&ctx, "Date month must be a number").await.unwrap();
+            Err(err) => {
+                msg.reply(&ctx, err).await.unwrap();
                 m.delete(&ctx).await.unwrap();
                 return Ok(());
             }
-        }
-        let start_time = NaiveDate::from_ymd_opt(1, 1, 1);
+        };
 
-        match &modal_interaction.data.components[0].components[0] {
-            ActionRowComponent::InputText(text) => {
-                modal_interaction.create_interaction_response(&ctx, |r| {
-                    r.kind(InteractionResponseType::ChannelMessageWithSource);
-                    r.interaction_response_data(|d| {
-                        d.ephemeral(false);
-                        d.content(format!("{}", text.value))
-                    })
-                }).await.unwrap();
+        let end_time = match parse_utils::parse_time(end_time) {
+            Ok(end_time) => {
+                end_time
             }
-            _ => unreachable!(),
+            Err(err) => {
+                msg.reply(&ctx, err).await.unwrap();
+                m.delete(&ctx).await.unwrap();
+                return Ok(());
+            }
+        };
+
+        if start_time > end_time {
+            msg.reply(&ctx, "Start time cannot be greater than end time").await.unwrap();
+            m.delete(&ctx).await.unwrap();
+            return Ok(());
         }
+
+        let start_time = NaiveDateTime::new(date, start_time);
+        let start_time = if let LocalResult::Single(start_time) =
+            Local::now().offset().from_local_datetime(&start_time) {
+            Utc.from_utc_datetime(&start_time.naive_utc())
+        }
+        else {
+            msg.reply(&ctx, "Date or time invalid").await.unwrap();
+            m.delete(&ctx).await.unwrap();
+            return Ok(());
+        };
+
+        let end_time = NaiveDateTime::new(date, end_time);
+        let end_time = if let LocalResult::Single(end_time) =
+            Local::now().offset().from_local_datetime(&end_time) {
+                end_time.with_timezone(&Utc)
+        }
+        else {
+            msg.reply(&ctx, "Date or time invalid").await.unwrap();
+            m.delete(&ctx).await.unwrap();
+            return Ok(());
+        };
+
+        let event = {
+            let data = ctx.data.read().await;
+            let db = data.get::<DbConnectionContainer>().unwrap();
+            let event = data::event::Event::new(name.to_string(), info.to_string(), start_time, end_time);
+            let input = DbInput::CreateEvent(event, true);
+            let output = Db::call(db, input).await;
+            cast!(output, DbOutput::CreateEvent).unwrap()
+        };
+
+        modal_interaction.create_interaction_response(&ctx, |r| {
+            r.kind(InteractionResponseType::ChannelMessageWithSource);
+            r.interaction_response_data(|d| {
+                d.content("Created event!").embed(|e| {
+                    e.title(event.name);
+                    e.description(event.info);
+                    e.field("Start time", event.start_time.with_timezone(&Local).to_string(), true);
+                    e.field("End time", event.end_time.with_timezone(&Local).to_string(), true)
+                })
+            })
+        }).await.unwrap();
     }
     else {
         msg.reply(&ctx, "Event creation timed out").await.unwrap();

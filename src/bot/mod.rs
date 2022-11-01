@@ -1,5 +1,7 @@
 mod commands;
 
+pub mod parse_utils;
+
 use tokio::task::JoinHandle;
 
 use std::collections::HashSet;
