@@ -19,6 +19,8 @@ use crate::{db::{
 }, bot::Bot};
 
 // TODO todo every meeting, send out a message in the attendance channel, react to mark attendance??
+// listen for reactions to attend it??? say when your attendance is recorded, message them
+// 
 
 #[tokio::main]
 async fn main() {

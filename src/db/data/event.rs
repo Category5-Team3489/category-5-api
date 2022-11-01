@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -9,12 +9,12 @@ pub struct Event {
     pub uuid: Uuid,
     pub name: String,
     pub info: String,
-    pub start_time: DateTime<Utc>,
-    pub end_time: DateTime<Utc>
+    pub start_time: NaiveDateTime,
+    pub end_time: NaiveDateTime
 }
 
 impl Event {
-	pub fn new(name: String, info: String, start_time: DateTime<Utc>, end_time: DateTime<Utc>) -> Self {
+	pub fn new(name: String, info: String, start_time: NaiveDateTime, end_time: NaiveDateTime) -> Self {
 		Event {
 			uuid: Uuid::new_v4(),
 			name,

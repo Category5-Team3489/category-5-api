@@ -175,26 +175,8 @@ pub async fn create(ctx: &Context, msg: &Message) -> CommandResult {
         }
 
         let start_time = NaiveDateTime::new(date, start_time);
-        let start_time = if let LocalResult::Single(start_time) =
-            Local::now().offset().from_local_datetime(&start_time) {
-            Utc.from_utc_datetime(&start_time.naive_utc())
-        }
-        else {
-            msg.reply(&ctx, "Date or time invalid").await.unwrap();
-            m.delete(&ctx).await.unwrap();
-            return Ok(());
-        };
 
         let end_time = NaiveDateTime::new(date, end_time);
-        let end_time = if let LocalResult::Single(end_time) =
-            Local::now().offset().from_local_datetime(&end_time) {
-                end_time.with_timezone(&Utc)
-        }
-        else {
-            msg.reply(&ctx, "Date or time invalid").await.unwrap();
-            m.delete(&ctx).await.unwrap();
-            return Ok(());
-        };
 
         let event = {
             let data = ctx.data.read().await;
@@ -211,8 +193,9 @@ pub async fn create(ctx: &Context, msg: &Message) -> CommandResult {
                 d.content("Created event!").embed(|e| {
                     e.title(event.name);
                     e.description(event.info);
-                    e.field("Start time", event.start_time.with_timezone(&Local).to_string(), true);
-                    e.field("End time", event.end_time.with_timezone(&Local).to_string(), true)
+                    // https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html#method.format_with_items
+                    e.field("Start time", event.start_time, true);
+                    e.field("End time", event.end_time, true)
                 })
             })
         }).await.unwrap();
