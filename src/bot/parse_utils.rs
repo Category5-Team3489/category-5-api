@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, Duration, NaiveTime};
+use chrono::{NaiveDate, NaiveTime};
 
 pub fn parse_date(date: &str) -> Result<NaiveDate, String> {
     let date_split = date.split('/').collect::<Vec<_>>();
@@ -23,8 +23,9 @@ pub fn parse_date(date: &str) -> Result<NaiveDate, String> {
         return Err("Date day must be a number".to_string());
     };
 
-    let year = date_split[1].parse::<i32>();
+    let year = date_split[2].parse::<i32>();
     let year = if let Ok(year) = year {
+        println!("{}", year);
         year
     }
     else {

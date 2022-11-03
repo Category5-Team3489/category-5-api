@@ -1,12 +1,10 @@
 use std::time::Duration;
 
-use chrono::{Local, NaiveDateTime, NaiveDate, Utc, TimeZone, NaiveTime, Timelike, LocalResult, FixedOffset, Offset};
-use serenity::builder::{CreateMessage, CreateEmbed};
-use serenity::collector::CollectModalInteraction;
+use chrono::NaiveDateTime;
 use serenity::framework::standard::macros::command;
-use serenity::framework::standard::{Args, CommandResult};
+use serenity::framework::standard::CommandResult;
 use serenity::model::prelude::*;
-use serenity::model::prelude::component::{InputTextStyle, ButtonStyle, InputText};
+use serenity::model::prelude::component::{InputTextStyle, ButtonStyle};
 use serenity::prelude::*;
 use serenity::model::application::interaction::InteractionResponseType;
 use crate::bot::commands::event::component::ActionRowComponent;
@@ -75,7 +73,8 @@ pub async fn create(ctx: &Context, msg: &Message) -> CommandResult {
                         i.style(InputTextStyle::Short);
                         i.label("Name");
                         i.placeholder("Ex: \"Robotics Meeting\"");
-                        i.required(true)
+                        i.required(true);
+                        i.max_length(100)
                     })
                 });
                 c.create_action_row(|row| {
@@ -84,7 +83,8 @@ pub async fn create(ctx: &Context, msg: &Message) -> CommandResult {
                         i.style(InputTextStyle::Paragraph);
                         i.label("Info (Not Required)");
                         i.placeholder("Ex: \"WEAR YOUR SAFETY GLASSES!!!\"");
-                        i.required(false)
+                        i.required(false);
+                        i.max_length(1000)
                     })
                 });
                 c.create_action_row(|row| {
@@ -194,8 +194,10 @@ pub async fn create(ctx: &Context, msg: &Message) -> CommandResult {
                     e.title(event.name);
                     e.description(event.info);
                     // https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html#method.format_with_items
-                    e.field("Start time", event.start_time, true);
-                    e.field("End time", event.end_time, true)
+                    e.field("Date", event.start_time.format("%m/%d/%Y"), false);
+                    e.field("Start time", event.start_time.format("%l:%M%p"), true);
+                    e.field("End time", event.end_time.format("%l:%M%p"), true);
+                    e.color(serenity::utils::Colour::DARK_GREEN)
                 })
             })
         }).await.unwrap();

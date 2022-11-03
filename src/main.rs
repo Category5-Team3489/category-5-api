@@ -20,7 +20,10 @@ use crate::{db::{
 
 // TODO todo every meeting, send out a message in the attendance channel, react to mark attendance??
 // listen for reactions to attend it??? say when your attendance is recorded, message them
-// 
+// could want to add an 0..n index for events and students, easier chosing of them if you print a list, or give better
+// search functions, replace uuid with 0..n index???
+
+// have !event create, read, delete commands
 
 #[tokio::main]
 async fn main() {
@@ -41,7 +44,7 @@ async fn main() {
 
     let db_task = db.start();
     let server_task =
-        axum::Server::bind(&"0.0.0.0:3000".parse().unwrap()).serve(server.into_make_service());
+        axum::Server::bind(&"0.0.0.0:6567".parse().unwrap()).serve(server.into_make_service());
     let bot_task = bot.start();
 
     let tasks = join!(db_task, server_task, bot_task);
